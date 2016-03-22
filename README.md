@@ -1,2 +1,3 @@
 # Openstack_TenantUsage
-Collecting Resource of Particular Tenant
+
+To collect resource usage of particular tenant, do source openrc with tenant ID and run this script
