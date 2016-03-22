@@ -1,0 +1,27 @@
+mkdir quota
+
+
+NVARS="RAM Cores FloatingIps Instances"
+CVARS="volumes gigabytes snapshots"
+
+echo "Tenant Name,,RAM(MBs),,,Cores,,,FloatingIps,,,Instances,,,Volumes,,,Gigabytes,,,Snapshots,,"
+echo "$OS_TENANT_NAME,Max,Used,Util %,Max,Used,Util %,Max,Used,Util %,Max,Used,Util%,Max,Used,Util %,Max,Used,Util %,Max,Used,Util %"
+
+nova --insecure absolute-limits  > ./quota/nova_limits
+for i in $NVARS
+do
+    Max=`cat ./tmp/nova_limits.$t  |grep $i | grep max | awk '{print $4}'`
+    Used=`cat ./tmp/nova_limits.$t |grep $i | grep Used | awk '{print $4}'`
+    PER=`expr  100 \* $Used \/ $Max`
+    echo -n ",$Max,$Used,$PER"
+done
+
+#From Cinder
+cinder --insecure quota-usage $OS_TENANT_ID > ./quota/cinder_limits
+for i in $CVARS
+do
+    Used=`cat ./tmp/cinder_limits.$t |grep $i | grep -v $i\_ | awk '{print $4}'`
+    Max=`cat ./tmp/cinder_limits.$t |grep $i | grep -v $i\_ | awk '{print $8}'`
+    PER=`expr  100 \* $Used \/ $Max`
+    echo -n ",$Max,$Used,$PER"
+done
